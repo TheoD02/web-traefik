@@ -15,7 +15,7 @@ Before getting started, please make sure you have the following prerequisites in
 2. Run the following command to set up the necessary certificates and configure Traefik. This script is specifically designed for use on the Windows Subsystem for Linux (WSL).
 
    ```bash
-   ./setup.sh
+   chmod u+x ./setup.sh && sh ./setup.sh
    ```
 
    The setup script does the following:
@@ -58,7 +58,7 @@ services:
       - ./config/traefik/config.yml:/etc/traefik/config.yml:ro
       - ./certs:/etc/certs:ro
     networks:
-      - http
+      - reverse-proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik=true"
@@ -85,10 +85,10 @@ services:
       - "traefik.http.routers.php.tls=true"
       - "traefik.http.services.php.loadbalancer.server.port=8000"
     networks:
-      - web_http
+      - reverse-proxy
 
 networks:
-  web_http:
+  reverse-proxy:
     external: true
 ```
 
