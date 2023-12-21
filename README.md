@@ -30,7 +30,7 @@ Once you've completed the setup, run the following command :
    ```bash
    docker compose up -d
    ```
-Traefik is ready to route traffic to your local services. The Traefik dashboard is accessible at [https://traefik.alls.dev](https://traefik.alls.dev).
+Traefik is ready to route traffic to your local services. The Traefik dashboard is accessible at [https://traefik.web.localhost](https://traefik.web.localhost).
 
 ## Project Configuration
 
@@ -81,7 +81,7 @@ services:
       - ./:/shared/httpd
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.php.rule=Host(`php.alls.dev`)"
+      - "traefik.http.routers.php.rule=Host(`php.web.localhost`)"
       - "traefik.http.routers.php.tls=true"
       - "traefik.http.services.php.loadbalancer.server.port=8000"
     networks:
@@ -92,7 +92,7 @@ networks:
     external: true
 ```
 
-This example exposes a Symfony project and configures Traefik to route traffic to it based on the subdomain "php.alls.dev."
+This example exposes a Symfony project and configures Traefik to route traffic to it based on the subdomain "php.web.localhost."
 
 Make sure to add similar labels to your services in your Docker Compose files to leverage Traefik's routing capabilities.
 
