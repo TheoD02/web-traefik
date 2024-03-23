@@ -5,6 +5,9 @@ services:
     image: traefik:v2.10
     container_name: traefik
     restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
     security_opt:
       - no-new-privileges:true
     command: --api.insecure=true --providers.docker
@@ -16,7 +19,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik=true"
-    network_mode: host
+    networks:
+      - traefik
 
 networks:
   traefik:
