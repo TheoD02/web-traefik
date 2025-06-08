@@ -34,12 +34,15 @@ That's it! This command will:
 
 ### Make Commands
 ```bash
-make start    # Start Traefik (default command)
+make start    # Start Traefik (generates certs if needed)
 make stop     # Stop Traefik
 make restart  # Restart Traefik
 make status   # Show Traefik status
 make logs     # Show Traefik logs
 make clean    # Stop and remove certificates
+make setup-certs # Generate SSL certificates only
+make dev      # Alias for start (quick development)
+make network  # Show Docker network information
 make help     # Show all available commands
 ```
 
@@ -52,12 +55,16 @@ castor status      # Show Traefik status
 castor logs        # Show Traefik logs
 castor clean       # Stop and remove certificates
 castor setup-certs # Generate SSL certificates only
+castor dev         # Alias for start (quick development)
+castor network     # Show Docker network information
 castor help        # Show all available commands
 ```
 
 ## Using Traefik
 
 Once started, Traefik is ready to route traffic to your local services. The Traefik dashboard is accessible at [https://traefik.web.localhost](https://traefik.web.localhost).
+
+Both Make and Castor provide identical functionality - choose the tool that fits your workflow best!
 
 ## Project Configuration
 
@@ -214,4 +221,3 @@ make network
 ## Additional Information
 
 If you have any questions or encounter issues, please refer to the Traefik documentation at [https://doc.traefik.io/](https://doc.traefik.io/) for more detailed information and troubleshooting tips.
-
