@@ -19,12 +19,18 @@ function help(): void
         'castor logs' => 'Show Traefik logs',
         'castor clean' => 'Stop and remove certificates',
         'castor setup-certs' => 'Generate SSL certificates only',
+        'castor dev' => 'Alias for start (quick development)',
         'castor network' => 'Show Docker network information',
     ];
     
     foreach ($commands as $command => $description) {
         io()->writeln(sprintf('  <info>%-20s</info> %s', $command, $description));
     }
+    
+    io()->newLine();
+    io()->section('Alternative: Use Make instead of Castor');
+    io()->writeln('  <info>make start</info>     # Same as \'castor start\'');
+    io()->writeln('  <info>make help</info>      # Show Make commands');
 }
 
 #[AsTask(description: 'Generate SSL certificates using mkcert')]
@@ -141,4 +147,3 @@ function dev(): void
 {
     start();
 }
-
