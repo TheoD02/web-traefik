@@ -1,0 +1,38 @@
+# Symfony/PHP Project Template
+# Copy this to your project's docker-compose.yml and customize as needed
+
+version: '3.9'
+
+services:
+  app:
+    image: devilbox/php-fpm:8.2-work-0.151
+    command: symfony serve --host=0.0.0.0 --port=8000
+    volumes:
+      - ./:/shared/httpd
+    working_dir: /shared/httpd
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.myapp.rule=Host(`myapp.web.localhost`)"
+      - "traefik.http.routers.myapp.tls=true"
+      - "traefik.http.services.myapp.loadbalancer.server.port=8000"
+    networks:
+      - traefik
+
+  # Optional: Database
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: myapp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.db.rule=Host(`db.web.localhost`)"
+      - "traefik.http.routers.db.tls=true"
+      - "traefik.http.services.db.loadbalancer.server.port=3306"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
+
