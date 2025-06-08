@@ -1,0 +1,67 @@
+# HTTP-Only Service Template
+# For services that need to stay on HTTP without HTTPS redirect
+# Copy this to your project's docker-compose.yml and customize as needed
+
+version: '3.9'
+
+services:
+  # Example: Legacy application that doesn't support HTTPS
+  legacy-app:
+    image: nginx:alpine
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+    labels:
+      - "traefik.enable=true"
+      # HTTP-only router (no TLS)
+      - "traefik.http.routers.legacy-http.rule=Host(`legacy.web.localhost`)"
+      - "traefik.http.routers.legacy-http.entrypoints=http"
+      - "traefik.http.services.legacy-http.loadbalancer.server.port=80"
+      # Prevent HTTPS redirect for this service
+      - "traefik.http.routers.legacy-http.middlewares=no-https-redirect"
+    networks:
+      - traefik
+
+  # Example: Development API that needs HTTP for testing
+  dev-api:
+    image: node:18-alpine
+    command: npm run dev
+    volumes:
+      - ./:/app
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+    labels:
+      - "traefik.enable=true"
+      # HTTP-only router
+      - "traefik.http.routers.devapi-http.rule=Host(`devapi.web.localhost`)"
+      - "traefik.http.routers.devapi-http.entrypoints=http"
+      - "traefik.http.services.devapi-http.loadbalancer.server.port=3000"
+      # No HTTPS redirect
+      - "traefik.http.routers.devapi-http.middlewares=no-https-redirect"
+    networks:
+      - traefik
+
+  # Example: Service with both HTTP and HTTPS support
+  dual-service:
+    image: nginx:alpine
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+    labels:
+      - "traefik.enable=true"
+      # HTTP router (no redirect)
+      - "traefik.http.routers.dual-http.rule=Host(`dual.web.localhost`)"
+      - "traefik.http.routers.dual-http.entrypoints=http"
+      - "traefik.http.routers.dual-http.middlewares=no-https-redirect"
+      - "traefik.http.services.dual-http.loadbalancer.server.port=80"
+      # HTTPS router
+      - "traefik.http.routers.dual-https.rule=Host(`dual.web.localhost`)"
+      - "traefik.http.routers.dual-https.entrypoints=https"
+      - "traefik.http.routers.dual-https.tls=true"
+      - "traefik.http.services.dual-https.loadbalancer.server.port=80"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
+

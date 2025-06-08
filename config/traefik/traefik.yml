@@ -23,10 +23,7 @@ log:
 entryPoints:
   http:
     address: ":80"
-    http:
-      redirections:
-        entryPoint:
-          to: https
-          scheme: https
+    # HTTP redirect to HTTPS is now optional - services can opt-out
   https:
     address: ":443"
+

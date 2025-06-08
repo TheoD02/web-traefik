@@ -9,7 +9,21 @@ http:
             sans:
               - "*.web.localhost"
 
+  middlewares:
+    # Middleware to force HTTPS redirect (default behavior)
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+    
+    # Middleware for services that should stay on HTTP
+    no-https-redirect:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "http"
+
 tls:
   certificates:
     - certFile: "/etc/certs/local-cert.pem"
       keyFile: "/etc/certs/local-key.pem"
+
