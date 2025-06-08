@@ -13,6 +13,10 @@ help: ## Show this help message
 	@echo "$(GREEN)Web-Traefik Local Development Setup$(NC)"
 	@echo "$(YELLOW)Available commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-12s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "$(YELLOW)Alternative: Use Castor instead of Make$(NC)"
+	@echo "  $(GREEN)castor start$(NC)  # Same as 'make start'"
+	@echo "  $(GREEN)castor help$(NC)   # Show Castor commands"
 
 setup-certs: ## Generate SSL certificates using mkcert
 	@echo "$(YELLOW)Setting up SSL certificates...$(NC)"
@@ -80,4 +84,3 @@ dev: start ## Alias for start (for quick development)
 network: ## Show Docker network information
 	@echo "$(YELLOW)Docker Networks:$(NC)"
 	@docker network ls | grep traefik || echo "$(RED)Traefik network not found$(NC)"
-

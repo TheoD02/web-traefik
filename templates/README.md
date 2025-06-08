@@ -18,6 +18,12 @@ Template for Node.js applications with optional Redis.
 Template for static websites using Nginx.
 - **URL**: `https://staticsite.web.localhost`
 
+### 📁 `http-only-service.yml`
+Template for services that need to stay on HTTP without HTTPS redirect.
+- **Legacy App**: `http://legacy.web.localhost` (HTTP only)
+- **Dev API**: `http://devapi.web.localhost` (HTTP only)
+- **Dual Service**: `http://dual.web.localhost` + `https://dual.web.localhost` (both)
+
 ## Usage
 
 1. Copy the template to your project:
@@ -42,7 +48,25 @@ Template for static websites using Nginx.
 - **Hostnames**: Use the pattern `{service}.web.localhost` for consistency
 - **Ports**: Make sure the `loadbalancer.server.port` matches your application's port
 - **Networks**: Always use the external `traefik` network
-- **SSL**: TLS is enabled by default for all services
+- **SSL**: TLS is enabled by default for all services (except HTTP-only template)
+- **HTTP-only**: Use `no-https-redirect` middleware to prevent HTTPS redirects
+
+## HTTP vs HTTPS Configuration
+
+### HTTPS (Default)
+```yaml
+labels:
+  - "traefik.http.routers.myapp.rule=Host(`myapp.web.localhost`)"
+  - "traefik.http.routers.myapp.tls=true"
+```
+
+### HTTP-only (No redirect)
+```yaml
+labels:
+  - "traefik.http.routers.myapp.rule=Host(`myapp.web.localhost`)"
+  - "traefik.http.routers.myapp.entrypoints=http"
+  - "traefik.http.routers.myapp.middlewares=no-https-redirect"
+```
 
 ## Need Help?
 
