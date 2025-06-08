@@ -10,15 +10,15 @@ RED := \033[0;31m
 NC := \033[0m # No Color
 
 help: ## Show this help message
-	@echo "$(GREEN)Web-Traefik Local Development Setup$(NC)"
+	@echo "$(GREEN)🌐 Web-Traefik Local Development Setup$(NC)"
 	@echo "$(YELLOW)Available commands:$(NC)"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-12s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo ""
 	@echo "$(YELLOW)Alternative: Use Castor instead of Make$(NC)"
-	@echo "  $(GREEN)castor start$(NC)  # Same as 'make start'"
-	@echo "  $(GREEN)castor help$(NC)   # Show Castor commands"
+	@echo "  $(GREEN)castor start$(NC)    # Same as 'make start'"
+	@echo "  $(GREEN)castor help$(NC)     # Show Castor commands"
 
-setup-certs: ## Generate SSL certificates using mkcert
+setup-certs: ## Generate SSL certificates only
 	@echo "$(YELLOW)Setting up SSL certificates...$(NC)"
 	@mkdir -p certs
 	@if command -v mkcert >/dev/null 2>&1; then \
@@ -51,7 +51,7 @@ setup-certs: ## Generate SSL certificates using mkcert
 	fi
 
 start: setup-certs ## Start Traefik (generates certs if needed)
-	@echo "$(YELLOW)Starting Traefik...$(NC)"
+	@echo "$(GREEN)Starting Traefik...$(NC)"
 	@docker compose up -d
 	@echo "$(GREEN)Traefik is running!$(NC)"
 	@echo "$(YELLOW)Dashboard: https://traefik.web.localhost$(NC)"
@@ -62,10 +62,13 @@ stop: ## Stop Traefik
 	@docker compose down
 	@echo "$(GREEN)Traefik stopped!$(NC)"
 
-restart: stop start ## Restart Traefik
+restart: ## Restart Traefik
+	$(MAKE) stop
+	$(MAKE) start
 
-clean: stop ## Stop Traefik and remove certificates
+clean: ## Stop and remove certificates
 	@echo "$(YELLOW)Cleaning up...$(NC)"
+	@docker compose down 2>/dev/null || true
 	@rm -rf certs/*.pem
 	@docker network rm traefik 2>/dev/null || true
 	@echo "$(GREEN)Cleanup complete!$(NC)"
@@ -78,7 +81,7 @@ logs: ## Show Traefik logs
 	@docker compose logs -f traefik
 
 # Quick development commands
-dev: start ## Alias for start (for quick development)
+dev: start ## Alias for start (quick development)
 
 # Show network info
 network: ## Show Docker network information
