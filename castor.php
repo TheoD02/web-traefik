@@ -2,8 +2,16 @@
 
 use Castor\Attribute\AsTask;
 
+use Castor\Exception\WaitFor\TimeoutReachedException;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use function Castor\capture;
+use function Castor\context;
+use function Castor\finder;
+use function Castor\fs;
 use function Castor\io;
 use function Castor\run;
+use function Castor\wait_for_docker_container;
+use function Castor\wait_for_http_response;
 
 #[AsTask(description: 'Show available commands')]
 function help(): void
@@ -40,30 +48,34 @@ function setupCerts(): void
     
     // Create certs directory
     run('mkdir -p certs');
-    
+
+    $quietAndAllowFailure = context()->withQuiet()->withAllowFailure();
+
     // Check if mkcert is available
-    $mkcertAvailable = run('command -v mkcert', quiet: true)->isSuccessful();
+    $mkcertAvailable = run('command -v mkcert', context: $quietAndAllowFailure)->isSuccessful();
     
     if (!$mkcertAvailable) {
         io()->warning('mkcert not found. Installing...');
         
         // Try to install mkcert based on available package managers
-        $aptAvailable = run('command -v apt', quiet: true)->isSuccessful();
-        $brewAvailable = run('command -v brew', quiet: true)->isSuccessful();
-        $chocoAvailable = run('command -v choco', quiet: true)->isSuccessful();
+        $aptAvailable = run('command -v apt', context: $quietAndAllowFailure)->isSuccessful();
+        $brewAvailable = run('command -v brew', context: $quietAndAllowFailure)->isSuccessful();
+        $chocoAvailable = run('command -v choco', context: $quietAndAllowFailure)->isSuccessful();
         
         if ($aptAvailable) {
             run('sudo apt update && sudo apt install -y mkcert libnss3-tools');
+            run(['sudo', 'apt', 'update']);
+            run(['sudo', 'apt', 'install', '-y', 'mkcert', 'libnss3-tools']);
         } elseif ($brewAvailable) {
-            run('brew install mkcert');
+            run(['brew', 'install', 'mkcert']);
         } elseif ($chocoAvailable) {
-            run('choco install mkcert');
+            run(['choco', 'install', 'mkcert']);
         } else {
             io()->error('Please install mkcert manually: https://github.com/FiloSottile/mkcert');
             return;
         }
         
-        run('mkcert -install');
+        run(['mkcert', '-install']);
     } else {
         io()->success('mkcert found, generating certificates...');
     }
@@ -88,10 +100,24 @@ function start(): void
     setupCerts();
     
     io()->section('🚀 Starting Traefik...');
-    run('docker compose up -d');
-    
+    run(['docker', 'compose', 'up', '-d']);
+
+    try {
+        wait_for_docker_container(
+            containerName: 'traefik',
+            timeout: 60,
+            containerChecker: static function () {
+                $status = capture(['docker', 'inspect', '-f', '{{.State.Running}}', 'traefik']);
+                return trim($status) === 'true';
+            }
+        );
+    } catch (TimeoutReachedException $e) {
+        io()->error("❌ Traefik container failed to start within the timeout period.");
+        return;
+    }
+
     io()->success('✅ Traefik is running!');
-    io()->writeln('📊 Dashboard: <href=https://traefik.web.localhost>https://traefik.web.localhost</>');
+    io()->writeln('📊 Dashboard: <href=https://traefik.web.localhost>https://traefik.web.localhost</> (If you see a SSL warning, restart your browser)');
     io()->writeln('🌐 Network: traefik');
 }
 
@@ -99,7 +125,7 @@ function start(): void
 function stop(): void
 {
     io()->section('🛑 Stopping Traefik...');
-    run('docker compose down');
+    run(['docker', 'compose', 'down']);
     io()->success('✅ Traefik stopped!');
 }
 
@@ -116,8 +142,8 @@ function clean(): void
     stop();
     
     io()->section('🧹 Cleaning up...');
-    run('rm -rf certs/*.pem', quiet: true);
-    run('docker network rm traefik 2>/dev/null || true', quiet: true);
+    fs()->remove(finder()->files()->in('certs')->ignoreDotFiles(true));
+    run(['docker', 'network', 'rm', 'traefik'], context: context()->withQuiet()->withAllowFailure());
     io()->success('✅ Cleanup complete!');
 }
 
@@ -125,21 +151,20 @@ function clean(): void
 function status(): void
 {
     io()->section('📊 Traefik Status:');
-    run('docker compose ps');
+    run(['docker', 'compose', 'ps']);
 }
 
 #[AsTask(description: 'Show Traefik logs')]
 function logs(): void
 {
-    run('docker compose logs -f traefik');
+    run(['docker', 'compose', 'logs', '-f', 'traefik']);
 }
 
 #[AsTask(description: 'Show Docker network information')]
 function network(): void
 {
     io()->section('🌐 Docker Networks:');
-    $result = run('docker network ls | grep traefik || echo "Traefik network not found"', quiet: true);
-    io()->writeln($result->getOutput());
+    run(['docker', 'network', 'ls']);
 }
 
 #[AsTask(description: 'Quick development alias for start')]
