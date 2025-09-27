@@ -50,8 +50,21 @@ setup-certs: ## Generate SSL certificates only
 		echo "$(GREEN)Certificates generated successfully!$(NC)"; \
 	fi
 
+check_docker: ## Check if Docker is installed and running
+	@echo "$(YELLOW)Checking Docker installation...$(NC)"
+	@if ! command -v docker >/dev/null 2>&1; then \
+  		echo "$(RED)Docker is not installed. Please install Docker first.$(NC)"; \
+  		exit 1; \
+  	fi
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "$(RED)Docker is not running. Please start Docker first.$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)Docker is installed and running.$(NC)"
+
 start: setup-certs ## Start Traefik (generates certs if needed)
 	@echo "$(GREEN)Starting Traefik...$(NC)"
+	$(MAKE) check_docker
 	@docker compose up -d
 	@echo "$(GREEN)Traefik is running!$(NC)"
 	@echo "$(YELLOW)Dashboard: https://traefik.web.localhost$(NC)"

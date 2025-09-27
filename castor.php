@@ -3,6 +3,7 @@
 use Castor\Attribute\AsTask;
 
 use Castor\Exception\WaitFor\TimeoutReachedException;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use function Castor\capture;
 use function Castor\context;
@@ -98,7 +99,15 @@ function setupCerts(): void
 function start(): void
 {
     setupCerts();
-    
+
+    io()->section('Checking Docker installation...');
+    if ((new ExecutableFinder())->find('docker') === null) {
+        io()->error('Docker is not installed or not found in PATH. Please install Docker to proceed.');
+        return;
+    }
+
+    io()->writeln('✅ Docker is installed.');
+
     io()->section('🚀 Starting Traefik...');
     run(['docker', 'compose', 'up', '-d']);
 
