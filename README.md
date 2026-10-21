@@ -77,7 +77,7 @@ version: '3.9'
 
 services:
   traefik:
-    image: traefik:v3.4
+    image: traefik:v3.7
     container_name: traefik
     restart: unless-stopped
     ports:
