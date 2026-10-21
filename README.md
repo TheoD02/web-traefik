@@ -73,11 +73,9 @@ Both Make and Castor provide identical functionality - choose the tool that fits
 Traefik is configured using the `compose.yaml` file in the repository. Here's an overview of the key settings:
 
 ```yaml
-version: '3.9'
-
 services:
   traefik:
-    image: traefik:v3.4
+    image: traefik:v3.7
     container_name: traefik
     restart: unless-stopped
     ports:
@@ -99,14 +97,13 @@ This configuration sets up Traefik to route traffic based on labels you add to y
 Here's an example of how to expose a Symfony project using a Docker Compose file:
 
 ```yaml
-version: '3.9'
-
 services:
   php:
-    image: devilbox/php-fpm:8.2-work-0.151
-    command: symfony serve
+    image: dunglas/frankenphp:1.13.2-php8.5.12-bookworm
+    environment:
+      SERVER_NAME: ":8000"
     volumes:
-      - ./:/shared/httpd
+      - ./:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.php.rule=Host(`php.web.localhost`)"
@@ -125,8 +122,6 @@ networks:
 For services that need to stay on HTTP without HTTPS redirect:
 
 ```yaml
-version: '3.9'
-
 services:
   legacy-app:
     image: nginx:alpine

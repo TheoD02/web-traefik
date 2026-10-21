@@ -1,11 +1,9 @@
 # Node.js Project Template
 # Copy this to your project's docker-compose.yml and customize as needed
 
-version: '3.9'
-
 services:
   app:
-    image: node:18-alpine
+    image: node:24-alpine
     command: npm run dev
     volumes:
       - ./:/app
@@ -22,7 +20,7 @@ services:
 
   # Optional: Redis for sessions/cache
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.redis.rule=Host(`redis.web.localhost`)"

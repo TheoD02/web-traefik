@@ -1,8 +1,6 @@
 # Static Site Template (Nginx)
 # Copy this to your project's docker-compose.yml and customize as needed
 
-version: '3.9'
-
 services:
   web:
     image: nginx:alpine

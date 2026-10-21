@@ -2,8 +2,6 @@
 # For services that need to stay on HTTP without HTTPS redirect
 # Copy this to your project's docker-compose.yml and customize as needed
 
-version: '3.9'
-
 services:
   # Example: Legacy application that doesn't support HTTPS
   legacy-app:
@@ -23,7 +21,7 @@ services:
 
   # Example: Development API that needs HTTP for testing
   dev-api:
-    image: node:18-alpine
+    image: node:24-alpine
     command: npm run dev
     volumes:
       - ./:/app
